@@ -4,7 +4,7 @@
 // Définition du sélecteur de bars
 let dropDownBar = d3.select('#filterbar')
                  .append("select")
-                 .attr("name", "bar-list")
+                 .attr("id", "bar-list")
                  .attr("class","selectpicker")
                  .attr("title", "Un bar en particulier ?");
 
@@ -13,14 +13,14 @@ let dropDownBar = d3.select('#filterbar')
 
 let dropDownBinch = d3.select('#filterbinch')
                  .append("select")
-                 .attr("name", "binch-list")
+                 .attr("id", "binch-list")
                  .attr("class","selectpicker")
                  .attr("data-live-search","true")
                  .attr("title", "Tapez pour rechercher");
 
 let dropDownBrass = d3.select('#filterbrass')
                  .append("select")
-                 .attr("name", "binch-list")
+                 .attr("id", "brass-list")
                  .attr("class","selectpicker")
                  .attr("data-live-search","true")
                  .attr("title", "Tapez pour rechercher");
@@ -34,13 +34,13 @@ let margins = {
   "bottom": 30
 };
 
-let width = window.innerWidth - margins.left - margins.right;
-let height = window.innerHeight - margins.top - margins.bottom;
+let width = $('.2r2c').width() - margins.left - margins.right;
+let height = $('.2emeRang').height() - margins.top - margins.bottom;
 
 let svgScat = d3.select("#scatter-load")
                 .append("svg")
-                .attr("width", width/2 + margins.left + margins.right)
-                .attr("height", height/2 + margins.top + margins.bottom)
+                .attr("width", width + margins.left + margins.right)
+                .attr("height", height + margins.top + margins.bottom)
                 .append("g")
                 .attr("transform", `translate(${margins.left},${margins.top})`);
 
@@ -53,11 +53,11 @@ let radius = 4;
 
 // Axiales
 let xScale = d3.scaleLinear()
-               .range([0, width/2])
+               .range([0, width])
                .nice();
 
 let yScale = d3.scaleLinear()
-               .range([height/2, 0])
+               .range([height, 0])
                .nice();
 
 // Couleurs selon le SRM/EBC
@@ -71,23 +71,62 @@ let barColorScale = d3.scaleOrdinal(d3.schemeCategory20);
 
 /////////////////////////////////////////////////////////
 // Parties relatives à la carte
+//Définition des couches de base de la carte
+let cartodbLayer =  L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',{
+  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+}); // Fond simple clair
+
+let stamenLayer =  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', {
+  attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  subdomains: 'abcd',
+  minZoom: 0,
+  ext: 'png'
+}); // Fond terrain
+
+// Définition de la carte
+let map = L.map('map', {
+  center: [46.52, 6.62],
+  zoom: 6
+});
+
+// Ajout des couches à la carte
+map.addLayer(cartodbLayer, stamenLayer);
+
+// Attribution des couches de bases pour le sélecteur
+var baseMaps = {
+    "Simple": cartodbLayer,
+    "Terrain": stamenLayer
+};
+// Ajout des noms au sélecteur
+L.control.layers(baseMaps).addTo(map);
+
+L.control.scale({
+  imperial: false
+}).addTo(map);
+
+// Ajout du bouton et fonction de localisation
+L.control.locate().addTo(map);
+
+// Définition des marqueurs des brasseries
 let brassMarker = L.AwesomeMarkers.icon({
     icon: 'industry',
     prefix: 'fa',
     markerColor: 'white',
     iconColor: 'black'
-  });
-
+});
+// Définition des marqueurs des bars
 let barMarker = L.AwesomeMarkers.icon({
     icon: 'beer',
     prefix: 'fa',
     markerColor: 'blue',
     iconColor: 'white'
-  });
+});
 
-// Nouveau cluster de markers
+// Rassemblement des marqueurs en clusters
 let brassMarkers = L.markerClusterGroup({
   showCoverageOnHover: false, //Ne pas montrer les limites
+  disableClusteringAtZoom: 12,
+  spiderfyOnMaxZoom: false
 });
 // A voir si on veut cluster les bars... TODO
 // let barMarkers = L.markerClusterGroup({
@@ -134,8 +173,7 @@ d3.json('binches.json', function(error, binches) {
                        .filter(function(d) {return selected == d.Bar;})
                        .attr("display", display);
               }
-
-
+                console.log("Bar choisi :" + $('select#bar-list.selectpicker').val() + ", un bar magnifique");
   });
 
 
@@ -171,6 +209,7 @@ d3.json('binches.json', function(error, binches) {
                        .filter(function(d) {return selected == d.Biere;})
                        .attr("display", display);
               }
+              console.log("Bière choisie :" + $('select#binch-list.selectpicker').val() + ", très bon choix !");
 
 });
 
@@ -207,6 +246,7 @@ d3.json('binches.json', function(error, binches) {
                        .filter(function(d) {return selected == d.Brasserie;})
                        .attr("display", display);
               }
+              console.log("Brasserie choisie :" + $('select#brass-list.selectpicker').val()+", un travail incomparable pour des bières (pas toujours) de qualité");
 
 });
 
@@ -220,7 +260,7 @@ d3.json('binches.json', function(error, binches) {
 // Ajout des axes du graphique
   svgScat.append("g")
          .attr("class", "x axis")
-         .attr("transform", `translate(0, ${height/2})`)
+         .attr("transform", `translate(0, ${height})`)
          .call(d3.axisBottom(xScale).tickPadding(5));
 
   svgScat.append("g")
@@ -274,16 +314,7 @@ d3.json('binches.json', function(error, binches) {
               .style("opacity", 0.5);
           });
 
-  let map = L.map('map').setView([48, 4], 6);
-
-   L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', {
-  	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  	subdomains: 'abcd',
-  	minZoom: 0,
-  	maxZoom: 18,
-  	ext: 'png'
-  }).addTo(map);
-
+  //////////////////////////// Parties cartes
   // Pour chaque brasserie, récupèrer les coordonnées et les assigner au pop-up + nom
   brasserieUnique.forEach(function(brass){
     let brasserie = binches.find(x => x.Brasserie === brass);
@@ -293,6 +324,10 @@ d3.json('binches.json', function(error, binches) {
         .addTo(brassMarkers);
   });
 
+  // Ajout des marqueurs à la carte
+  map.addLayer(brassMarkers);
+
+  // Import du fichier des bars et ajout à la carte
   d3.json('bars.json', function(error, barsLsne) {
     if (error) { // Si le fichier n'est pas chargé, log de l'erreur
       console.log(error);
@@ -305,11 +340,7 @@ d3.json('binches.json', function(error, binches) {
     }
   });
 
-  // Ajout des marqueurs à la carte
-  map.addLayer(brassMarkers);
   // map.addLayer(barMarkers); si cluster
-
-  L.control.locate().addTo(map);
 
 });
 
@@ -317,8 +348,8 @@ d3.json('binches.json', function(error, binches) {
 svgScat.append("text")
        .attr("class", "x label")
        .attr("text-anchor", "end")
-       .attr("x", width/2-5)
-       .attr("y", height/2-7)
+       .attr("x", width-5)
+       .attr("y", height-7)
        .text("Alcool par volume (%)");
 
 svgScat.append("text")
@@ -331,7 +362,7 @@ svgScat.append("text")
        .text("Amertume (IBU)");
 
 
-d3.json('matrix.json', function(error, distances) {
+d3.csv('rowdist.csv', function(error, distances) {
   if (error) { // Si le fichier n'est pas chargé, log de l'erreur
     console.log(error);
   }
