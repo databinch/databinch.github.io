@@ -316,7 +316,7 @@ d3.json('binches.json', function(error, binches) {
 
             toolTip.html(`<b>${d.Biere}</b><br><i>Style : ${d.STYLE4}\
               <br>Amertume : ${d.IBU} IBU<br>Alcool : ${d.ABV} %\
-              <br>Brasserie : ${d.Brasserie}</i>`)
+              <br>Brasserie : ${d.Brasserie} <br> Bar : ${d.Bar}</i>`)
               .style("left", `${d3.event.pageX+20}px`)
               .style("top", `${d3.event.pageY+20}px`);
 
@@ -338,21 +338,54 @@ d3.json('binches.json', function(error, binches) {
               .style("opacity", 0.5);
           })
           .on("click",function(d){
+
+
             var spanBeer = d3.select("#selectedBeer")
-                .html("La bière sélectionnées est : <b>"+ d.Biere+"</b>,<br>");
+                .html("La bière sélectionnée est : <b>"+ d.Biere+"</b>,<br>");
 
             var spanABV = d3.select("#ABVselectedBeer")
-                .html("Son taux d'alcool est de " + d.ABV + " %"+" alors que la médiane est à 6.5 %,<br>");
+                .html("Son taux d'alcool est de " + d.ABV + " %"+" alors que la médiane est à 6.5 %, <br>");
+
+            var spanBrass = d3.select("#BrassselectedBeer")
+                    .html(" brassée par " + d.Brasserie + ",<br>");
 
             var spanIBU = d3.select("#IBUselectedBeer")
                     .html("Son amertume est mesurée à " + d.IBU +" IBU"+" alors que la médiane est à 32 IBU,<br>");
 
             var spanStyle = d3.select("#SytleselectedBeer")
-                .html("C'est une bière de type "+ d.STYLE4+",<br>");
+                .html("C'est une bière de type "+ d.STYLE4);
 
             var spanBar = d3.select("#BarselectedBeer")
-                    .html("On peut la trouver ici : " + d.Bar);
+                    .html("On peut la trouver ici : " + d.Bar+"<br>");
 
+            document.getElementById('Biereproches').innerHTML="";
+
+                    d3.csv('rowdist.csv', function(data) {
+
+                            data.forEach(function(d) {
+                            d.weight = +d.Weight;
+
+                          });
+
+      // retourne les 10 bières les plus proches
+
+                          var filtered = data.filter(function (item) {
+                              return item.Source === d.Biere;
+                          });
+
+                          var rankdist = filtered.filter(function (item){
+                            return item.weight < 0.5;
+                          });
+                          rankdist.sort(function(a, b) { return a.weight - b.weight;});
+
+
+                          for (var current = 0; current < 10; current++){
+
+                          document.getElementById('Biereproches').innerHTML += ("Bière proche de <b>"+d.Biere +"</b> #" + current + ": <b>" + rankdist[current].Target +"</b><br>");
+                          console.log("Bière proche de "+d.Biere +" #", current, ": ", rankdist[current].Target);
+                          }
+
+                    });
           });
 
   //////////////////////////// Parties cartes
@@ -364,7 +397,7 @@ d3.json('binches.json', function(error, binches) {
         .bindPopup(brasserie.Brasserie)
         .addTo(brassMarkers);
 
-        console.log(brasserie.Brasserie);
+      //  console.log(brasserie.Brasserie);
 
   });
 
@@ -385,7 +418,7 @@ d3.json('binches.json', function(error, binches) {
   // Loop through the data
   for (var i = 0; i < barsLsne.length; i++) {
     var person = barsLsne[i];
-    console.log(person.Lat);
+  //  console.log(person.Lat);
     // Create and save a reference to each marker
     markers[person.Bar] = L.marker([person.Lat, person.Long], {
     })
@@ -396,7 +429,8 @@ d3.json('binches.json', function(error, binches) {
     markers[person.Bar]._icon.id = person.Bar;
   }
 
-  console.log(markers);
+//  console.log(markers);
+
   // Add click event to markers
   $('.leaflet-marker-icon').on('click', function(e) {
      // Use the event to find the clicked element
@@ -439,26 +473,3 @@ svgScat.append("text")
        .attr("dy", ".75em")
        .attr("transform", "rotate(-90)")
        .text("Amertume (IBU)");
-
-
-d3.csv('rowdist.csv', function(d) {
-
-
-  return {
-    source : d.Source,
-    target : d.Target,
-    weight : +d.Weight,
-  };
-},
-  function(data){
-
-        console.log("data[1]:", data[1]);
-
-        distances = d3.nest()
-                    .key(function(data) { return data.source; })
-                    .key(function(data) { return data.weight; })
-                    .map(data);
-    console.log("distances:", distances);
-
-
-});
