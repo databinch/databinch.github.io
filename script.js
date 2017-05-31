@@ -1,12 +1,23 @@
 /*jshint esnext: true */
 
-// TODO
 
-// interaction entre les sélecteurs -> sinon remise à zéro des autres quand un est sélectionné
+// interaction entre les sélecteurs -> sinon remise à zéro des autres quand un est sélectionné TODO
 
-// optimisation graphique de l'affichage du recommender system
+// optimisation graphique de l'affichage du recommender system TODO
 
-// affichage du recommender system lors du choix de la biere via le selecteur de biere
+// affichage du recommender system lors du choix de la biere via le selecteur de biere TODO
+
+// affichage de tous les bars au sein desquels la biere choisie est disponible TODO
+
+// fonction zoom sur le scatterplot ? TODO
+
+// possibilité de cliquer sur les bières proches renvoyées afin de pouvoir trouver les trouver dans les bars TODO
+
+// bouton reset qui remet tout à zéro (actualise) ? TODO
+
+// slider IBU  ? -> filtre bières scatterplot TODO
+
+// peut être afficher le nom des bars au survol sur la carte TODO
 
 
 
@@ -52,7 +63,6 @@ let svgScat = d3.select("#scatter-load")
                 .attr("height", height + margins.top + margins.bottom)
                 .append("g")
                 .attr("transform", `translate(${margins.left},${margins.top})`);
-
 let toolTip = d3.select("body").append("div")
                 .attr("class", "tooltip")
                 .style("opacity", 0);
@@ -272,12 +282,12 @@ d3.json('binches.json', function(error, binches) {
   barColorScale.domain(bars);
 
 // Ajout des axes du graphique
-  svgScat.append("g")
+var xAxis =  svgScat.append("g")
          .attr("class", "x axis")
          .attr("transform", `translate(0, ${height})`)
          .call(d3.axisBottom(xScale).tickPadding(5));
 
-  svgScat.append("g")
+var yAxis =   svgScat.append("g")
          .attr("class", "y axis")
          .call(d3.axisLeft(yScale).tickPadding(5));
 
@@ -296,6 +306,7 @@ d3.json('binches.json', function(error, binches) {
          .style("fill", d => SrmColorScale(d.SRM))
          .style("stroke", "none")
          .style("opacity", 0.5);
+
   // Définition des interactions
   svgScat.selectAll(".dot")
          .data(binches)
@@ -375,6 +386,7 @@ d3.json('binches.json', function(error, binches) {
                           }
 
                     });
+
 
                     map.setView(new L.LatLng(d.Lat, d.Long), 12);
           });
