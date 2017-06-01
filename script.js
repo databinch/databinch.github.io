@@ -109,8 +109,8 @@ let stamenLayer =  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrai
 
 // Définition de la carte
 let map = L.map('map', {
-  center: [46.52, 6.62],
-  zoom: 6
+  center: [46.52243400482112, 6.632995605468751],
+  zoom: 15
 });
 
 // Ajout des couches à la carte
@@ -185,6 +185,12 @@ d3.json('binches.json', function(error, binches) {
 
   dropDownBar.on("change", function(binches) {
               let selectedBar = this.value;
+              $('#brass-list').val("");
+              $('#brass-list').selectpicker("refresh");
+
+              $('#binch-list').val("");
+              $('#binch-list').selectpicker("refresh");
+
 
               if (selectedBar == 'TOUS') {
                 svgScat.selectAll("circle")
@@ -199,7 +205,7 @@ d3.json('binches.json', function(error, binches) {
                        .attr("r", radius);
               }
                 console.log("Bar choisi :" + $('select#bar-list.selectpicker').val() + ", un bar magnifique");
-                map.setView(markers[$('select#bar-list.selectpicker').val()].getLatLng(), 18);
+                map.flyTo(markers[$('select#bar-list.selectpicker').val()].getLatLng(), 18);
 
   });
 
@@ -218,6 +224,11 @@ d3.json('binches.json', function(error, binches) {
 
   dropDownBinch.on("change", function(binches) {
               let selectedBinch = this.value;
+              $('#brass-list').val("");
+              $('#brass-list').selectpicker("refresh");
+
+              $('#bar-list').val("");
+              $('#bar-list').selectpicker("refresh");
 
               if (selectedBinch == 'TOUTES') {
                 svgScat.selectAll("circle")
@@ -253,6 +264,11 @@ d3.json('binches.json', function(error, binches) {
 
   dropDownBrass.on("change", function() {
               let selectedBrasserie = this.value;
+              $('#bar-list').val("");
+              $('#bar-list').selectpicker("refresh");
+
+              $('#binch-list').val("");
+              $('#binch-list').selectpicker("refresh");
 
               if (selectedBrasserie == 'TOUTES') {
                 svgScat.selectAll("circle")
@@ -397,7 +413,7 @@ var yAxis =   svgScat.append("g")
     let brasserie = binches.find(x => x.Brasserie === brass);
 
     let marker = new L.marker([brasserie.Lat, brasserie.Long], {icon: brassMarker})
-        .bindPopup(brasserie.Brasserie)
+        .bindTooltip(brasserie.Brasserie)
         .addTo(brassMarkers)
         .on("click", function (d){
           let selectedBrass = brasserie.Brasserie;
@@ -414,9 +430,6 @@ var yAxis =   svgScat.append("g")
             console.log("Brasserie choisie :" + selectedBrass);
 
         });
-      //  console.log(brasserie.Brasserie);
-
-
   });
 
 
@@ -437,16 +450,18 @@ var yAxis =   svgScat.append("g")
 
   // Loop through the data
   for (var i = 0; i < barsLsne.length; i++) {
-    var person = barsLsne[i];
+    var bar = barsLsne[i];
   //  console.log(person.Lat);
     // Create and save a reference to each marker
-    markers[person.Bar] = L.marker([person.Lat, person.Long], {
+    markers[bar.Bar] = L.marker([bar.Lat, bar.Long], {
+      icon: barMarker,
+      riseOnHover: true
     })
-    .bindPopup(person.Bar)
+    .bindTooltip(bar.Bar,  {className: 'barTooltip'})
     .addTo(map);
 
     // Add the ID
-    markers[person.Bar]._icon.id = person.Bar;
+    markers[bar.Bar]._icon.id = bar.Bar;
 
 
 //  console.log(markers);
