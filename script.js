@@ -6,22 +6,25 @@
 let dropDownBar = d3.select("#filterbar")
   .append("select")
   .attr("id", "bar-list")
-  .attr("class", "selectpicker")
   .attr("class", "selecteur")
+  .attr("class", "selectpicker")
+  .attr("data-live-search", "true")
   .attr("title", "Un bar en particulier ?");
 
 let dropDownBrass = d3.select("#filterbrass")
   .append("select")
   .attr("id", "brass-list")
-  .attr("class", "selectpicker")
   .attr("class", "selecteur")
+  .attr("class", "selectpicker")
+  .attr("data-live-search", "true")
   .attr("title", "Tapez pour rechercher");
 
 let dropDownBinch = d3.select("#filterbinch")
   .append("select")
   .attr("id", "binch-list")
-  .attr("class", "selectpicker")
   .attr("class", "selecteur")
+  .attr("class", "selectpicker")
+  .attr("data-live-search", "true")
   .attr("title", "Tapez pour rechercher");
 
 // Définitions des éléments relatifs au scatteplot
@@ -247,6 +250,10 @@ function drawSvg(redraw) {
     // Ajout des options et interactions aux sélecteurs de bars, brasseries et bières
 
     // BARS select
+    $("#bar-list")
+       .append("html",'<option>TOUS</option>')
+       .selectpicker('refresh');
+
     // Assignement des bars au sélecteur
     let optDropBar = dropDownBar.selectAll("option")
       .data(["TOUS"].concat(bars))
@@ -256,6 +263,9 @@ function drawSvg(redraw) {
     // Ajout du texte
     optDropBar.text(d => d)
       .attr("value", d => d);
+
+    // Actualisation pour affichage
+    $('#bar-list').selectpicker('refresh');
 
     // Fonction à la sélection d'un bar
     dropDownBar.on("change", function() {
@@ -267,7 +277,7 @@ function drawSvg(redraw) {
 
       // Màj des informations et sélecteurs
       updateInfos(selectedBar);
-      updateAllSelects(selectedBar);
+      updateAllSelects(selectedBar, "bar-list");
 
       // Déplace la carte pour centrer sur le bar sélectionné, ouvre le tooltip et le met au premier plan
       goToMarker(selectedBar, markers);
@@ -277,6 +287,11 @@ function drawSvg(redraw) {
 
     // BINCHES select
     // Assignement des bières au sélecteur
+
+    $("#binch-list")
+       .append("html",'<option>TOUTES</option>')
+       .selectpicker('refresh');
+
     let optDropBinch = dropDownBinch.selectAll("option")
       .data(["TOUTES"].concat(biereUnique))
       .enter()
@@ -286,6 +301,9 @@ function drawSvg(redraw) {
     // Ajout du texte
     optDropBinch.text(d => d)
       .attr("value", d => d);
+
+    // Actualisation pour affichage
+    $('#binch-list').selectpicker('refresh');
 
     // Fonction à la sélection d'une bière
     dropDownBinch.on("change", function() {
@@ -306,7 +324,7 @@ function drawSvg(redraw) {
 
       // Màj des informations et sélecteurs
       updateInfos(selectedBinch, binches, biereBar);
-      updateAllSelects(selectedBinch);
+      updateAllSelects(selectedBinch, "binch-list");
 
       if (selectedBinch != 'TOUTES') {
         // Ajustement du titre
@@ -348,8 +366,8 @@ function drawSvg(redraw) {
           updateInfos(biereProcheSelect, binches, biereBar);
           updateAllSelects(biereProcheSelect, "binch-list");
 
-            // Màj des informations relatives à la bière sur la page
-            document.getElementById('Biereproches').innerHTML = `<h3 id="titreSimi">Similaires à ${biereProcheSelect}</h3><br>`;
+          // Màj des informations relatives à la bière sur la page
+          document.getElementById('Biereproches').innerHTML = `<h3 id="titreSimi">Similaires à ${biereProcheSelect}</h3><br>`;
 
           // Vérifier que la limite du nombre de bière n'est pas inférieur à celle définie
           let limite;
@@ -377,6 +395,12 @@ function drawSvg(redraw) {
     });
 
     // BRASSERIES select
+
+    $("#brass-list")
+       .append("html",'<option>TOUTES</option>')
+       .selectpicker('refresh');
+
+
     // Assignement des brasseries au sélecteur
     let optDropBrass = dropDownBrass.selectAll("option")
       .data(["TOUTES"].concat(brasserieUnique))
@@ -388,6 +412,9 @@ function drawSvg(redraw) {
     optDropBrass.text(d => d)
       .attr("value", d => d);
 
+    // Actualisation pour affichage
+     $('#brass-list').selectpicker('refresh');
+
     // Fonction à la sélection d'une brasserie
     dropDownBrass.on("change", function() {
 
@@ -398,7 +425,7 @@ function drawSvg(redraw) {
 
       // Màj des informations et sélecteurs
       updateInfos(selectedBrasserie);
-      updateAllSelects(selectedBrasserie);
+      updateAllSelects(selectedBrasserie, "brass-list");
 
       // Déplace la carte pour centrer sur le bar sélectionné, ouvre le tooltip et le met au premier plan
       goToMarker(selectedBrasserie, brassMarkersObj);
@@ -516,7 +543,7 @@ function drawSvg(redraw) {
         }
         // Pour les x (limite) bières les plus proches, afficher leur nom avec un logo et les mettres sur le graphe en petit
         for (let i = 0; i < limite; i++) {
-          document.getElementById('Biereproches').innerHTML += `<img id=${i} class="bProches" src=${beericon}><b id=${i} class="bProches">${rankdist[i].Target}</b><br>`; //("<img src='"+beericon+"'>"+ "<b>" + rankdist[i].Target +"</b><br>");
+          document.getElementById('Biereproches').innerHTML += `<img id=${i} class="bProches" src=${beericon}><b id=${i} class="bProches">${rankdist[i].Target}</b><br>`;
           d3.selectAll('circle')
             .filter(d => rankdist[i].Target == d.Biere)
             .transition()
@@ -540,7 +567,8 @@ function drawSvg(redraw) {
             // Màj des informations relatives à la bière sur la page
             updateInfos(biereProcheSelect, binches, biereBar);
             updateAllSelects(biereProcheSelect, "binch-list");
-            document.getElementById('Biereproches').innerHTML = `<h3 id="titreSimi">Similaires à ${biereProcheSelect}</h3><br>`; //"<h3>Similaires à "+d.Biere+" </h3><br>";
+
+            document.getElementById('Biereproches').innerHTML = `<h3 id="titreSimi">Similaires à ${biereProcheSelect}</h3><br>`;
 
             // Màj des informations relatives à la bière sur la page
             let limite;
@@ -551,7 +579,7 @@ function drawSvg(redraw) {
             }
             // Pour les x (limite) bières les plus proches, afficher leur nom avec un logo et les mettres sur le graphe en petit
             for (let i = 0; i < limite; i++) {
-              document.getElementById('Biereproches').innerHTML += `<img id=${i} class="bProches" src=${beericon}><b id=${i} class="bProches">${rankdist[i].Target}</b><br>`; //("<img src='"+beericon+"'>"+ "<b>" + rankdist[i].Target +"</b><br>");
+              document.getElementById('Biereproches').innerHTML += `<img id=${i} class="bProches" src=${beericon}><b id=${i} class="bProches">${rankdist[i].Target}</b><br>`;
               d3.selectAll('circle')
                 .filter(d => rankdist[i].Target == d.Biere)
                 .transition()
@@ -584,6 +612,7 @@ function drawSvg(redraw) {
 
           updateInfos(selectedBrass);
           updateAllSelects(selectedBrass, "brass-list");
+
           goToMarker(selectedBrass, brassMarkersObj);
 
         pickCircles(selectedBrass, "d.Brasserie");
@@ -690,6 +719,7 @@ document.getElementById('BrassSelectedBeer').addEventListener("click", function(
   // Màj des informations et sélecteurs
   updateInfos(selectedBrass);
   updateAllSelects(selectedBrass, "brass-list");
+
 });
 
 // Rend les bars où la bière est disponible interactifs
@@ -711,9 +741,7 @@ document.getElementById('BarSelectedBeer').addEventListener("click", function(e)
 // MàJ des sélecteurs et "réinitialisation" si tout est sélectionné
 function updateAllSelects(selected, selectId) {
   if (selected == 'TOUTES' || selected == 'TOUS') {
-    $('.selecteur').each(function() {
-      this.selectedIndex = 0;
-    });
+    $('.selectpicker').selectpicker('val', 'default');
 
     svgScat.selectAll("circle")
       .transition()
@@ -721,17 +749,17 @@ function updateAllSelects(selected, selectId) {
       .attr("r", radius);
 
   } else {
-    $('.selecteur').each(function() {
+    $('.selectpicker').each(function(){
       // Vérifie si le sélecteur n'est pas déjà à jour
-      if (this.value != selected) {
+      if ($(this).val() != selected) {
         // Sinon attribue au bon sélecteur la valeur en cours
         if (this.id == selectId) {
-          this.value = selected;
+          $(`#${selectId}.selectpicker`).selectpicker('val', selected);
         } else {
-          this.value = "";
+          $(this).selectpicker('val', 'default');
         }
       }
-    });
+    })
   }
 }
 

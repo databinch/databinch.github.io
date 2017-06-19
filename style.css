@@ -83,15 +83,6 @@ text {
   font-weight: bold;
 }
 
-.bootstrap-select li.selected a {
-  background: #3086E4;
-  color: white;
-}
-
-.bootstrap-select li.selected a:hover {
-  background: #256CB8;
-}
-
 .box {
   border: 1px solid #EEE;
   margin: 3px;
